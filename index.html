@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>desflow — Skaitmeninis gamybos valdymas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0e17;
+    --bg-alt: #0f1420;
+    --panel: #131a29;
+    --panel-border: rgba(255,255,255,0.08);
+    --text: #e8ecf5;
+    --text-dim: #9aa4b8;
+    --accent: #5b8cff;
+    --accent2: #22d3c9;
+    --accent-grad: linear-gradient(135deg, #5b8cff 0%, #22d3c9 100%);
+    --white-section: #f7f8fb;
+    --white-text: #10131c;
+    --white-dim: #5c6579;
+    --radius: 16px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Inter', sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+  }
+  h1,h2,h3,h4{font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.02em;}
+  a{text-decoration:none; color:inherit;}
+  .wrap{max-width:1160px; margin:0 auto; padding:0 24px;}
+  img{max-width:100%; display:block;}
+
+  /* NAV */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,14,23,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--panel-border);
+  }
+  nav{display:flex; align-items:center; justify-content:space-between; padding:18px 24px; max-width:1160px; margin:0 auto;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px;}
+  .logo-mark{width:30px; height:30px; border-radius:8px; background:var(--accent-grad); display:flex; align-items:center; justify-content:center; font-size:16px; color:#0a0e17; font-weight:700;}
+  .nav-links{display:flex; gap:32px; font-size:14px; color:var(--text-dim);}
+  .nav-links a:hover{color:var(--text);}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:11px 22px; border-radius:999px; font-size:14px; font-weight:600;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--accent-grad); color:#06121f;}
+  .btn-ghost{border:1px solid var(--panel-border); color:var(--text);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.05);}
+
+  /* HERO */
+  .hero{
+    padding:110px 24px 90px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:'';
+    position:absolute; top:-200px; left:50%; transform:translateX(-50%);
+    width:900px; height:600px;
+    background: radial-gradient(circle, rgba(91,140,255,0.25) 0%, rgba(34,211,201,0.08) 45%, transparent 70%);
+    filter:blur(10px);
+    pointer-events:none;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--panel); border:1px solid var(--panel-border);
+    padding:7px 16px; border-radius:999px; font-size:13px; color:var(--text-dim);
+    margin-bottom:28px;
+  }
+  .eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--accent2); box-shadow:0 0 8px var(--accent2);}
+  .hero h1{
+    font-size:52px; max-width:820px; margin:0 auto 22px; position:relative;
+    background:linear-gradient(180deg, #fff 0%, #b9c2d6 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p.sub{
+    max-width:600px; margin:0 auto 40px; color:var(--text-dim); font-size:18px; position:relative;
+  }
+  .hero-ctas{display:flex; gap:14px; justify-content:center; margin-bottom:70px; position:relative;}
+
+  /* HERO PREVIEW CARD */
+  .preview-card{
+    max-width:920px; margin:0 auto; border-radius:20px;
+    background:linear-gradient(180deg, var(--panel) 0%, #0d1220 100%);
+    border:1px solid var(--panel-border);
+    padding:8px; position:relative;
+  }
+  .preview-inner{
+    border-radius:14px; background:var(--bg-alt); padding:28px;
+    display:grid; grid-template-columns:1fr 1fr; gap:20px;
+  }
+  .mini-panel{background:var(--panel); border:1px solid var(--panel-border); border-radius:12px; padding:18px; text-align:left;}
+  .mini-panel .label{font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px;}
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px;}
+  .bar-row span:first-child{width:80px; color:var(--text-dim); flex-shrink:0;}
+  .bar-track{flex:1; height:8px; background:rgba(255,255,255,0.06); border-radius:99px; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:99px; background:var(--accent-grad);}
+  .stock-row{display:flex; justify-content:space-between; font-size:13px; padding:8px 0; border-bottom:1px solid var(--panel-border);}
+  .stock-row:last-child{border-bottom:none;}
+  .tag{font-size:11px; padding:3px 8px; border-radius:6px; font-weight:600;}
+  .tag.in{background:rgba(34,211,201,0.15); color:var(--accent2);}
+  .tag.out{background:rgba(255,107,107,0.15); color:#ff8a8a;}
+
+  /* SECTIONS GENERAL */
+  section{padding:100px 24px;}
+  .section-head{text-align:center; max-width:640px; margin:0 auto 60px;}
+  .section-head .eyebrow{margin-bottom:18px;}
+  .section-head h2{font-size:36px; margin-bottom:16px;}
+  .section-head p{color:var(--text-dim); font-size:16px;}
+
+  /* FEATURES (dark) */
+  .features-grid{display:grid; grid-template-columns:1fr 1fr; gap:28px; max-width:1120px; margin:0 auto;}
+  .feature-card{
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:var(--radius);
+    padding:36px; position:relative; overflow:hidden;
+  }
+  .feature-card .badge{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:.04em;
+    padding:5px 12px; border-radius:999px; margin-bottom:20px;
+    background:rgba(91,140,255,0.15); color:#a9c1ff;
+  }
+  .feature-card.soon .badge{background:rgba(34,211,201,0.15); color:var(--accent2);}
+  .feature-icon{
+    width:48px; height:48px; border-radius:12px; background:var(--accent-grad);
+    display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:20px;
+  }
+  .feature-card h3{font-size:22px; margin-bottom:12px;}
+  .feature-card p{color:var(--text-dim); font-size:15px; margin-bottom:20px;}
+  .feature-list{list-style:none;}
+  .feature-list li{
+    display:flex; align-items:flex-start; gap:10px; font-size:14px; color:var(--text-dim);
+    padding:8px 0; border-top:1px solid var(--panel-border);
+  }
+  .feature-list li:first-child{border-top:none;}
+  .feature-list li::before{content:'✓'; color:var(--accent2); font-weight:700; flex-shrink:0;}
+  .btn-sm-link{margin-top:22px; padding:9px 18px; font-size:13px;}
+
+  /* BENEFITS (light) */
+  .white-section{background:var(--white-section); color:var(--white-text);}
+  .white-section .section-head p{color:var(--white-dim);}
+  .white-section .eyebrow{background:#fff; border-color:#e3e6ee; color:var(--white-dim);}
+  .benefits-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:24px; max-width:1120px; margin:0 auto;}
+  .benefit{background:#fff; border:1px solid #e6e9f0; border-radius:14px; padding:28px 22px;}
+  .benefit .num{font-family:'Space Grotesk'; font-size:14px; color:var(--accent); font-weight:700; margin-bottom:14px;}
+  .benefit h4{font-size:17px; margin-bottom:8px;}
+  .benefit p{font-size:14px; color:var(--white-dim);}
+
+  /* HOW IT WORKS */
+  .steps{max-width:900px; margin:0 auto; position:relative;}
+  .step{display:grid; grid-template-columns:56px 1fr; gap:24px; padding-bottom:44px; position:relative;}
+  .step:last-child{padding-bottom:0;}
+  .step::before{
+    content:''; position:absolute; left:27px; top:56px; bottom:0; width:1px;
+    background:var(--panel-border);
+  }
+  .step:last-child::before{display:none;}
+  .step-num{
+    width:56px; height:56px; border-radius:50%; background:var(--panel); border:1px solid var(--panel-border);
+    display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; font-size:18px;
+    color:var(--accent2); flex-shrink:0;
+  }
+  .step h4{font-size:19px; margin-bottom:8px;}
+  .step p{color:var(--text-dim); font-size:15px; max-width:560px;}
+
+  /* FAQ */
+  .faq-list{max-width:760px; margin:0 auto;}
+  .faq-item{border-bottom:1px solid var(--panel-border); padding:22px 0;}
+  .faq-item summary{
+    cursor:pointer; font-size:16px; font-weight:600; list-style:none;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{content:'+'; font-size:20px; color:var(--text-dim); transition:transform .2s;}
+  .faq-item[open] summary::after{transform:rotate(45deg);}
+  .faq-item p{color:var(--text-dim); font-size:15px; margin-top:14px; max-width:640px;}
+
+  /* CTA / SIGNUP */
+  .cta-banner{
+    max-width:1000px; margin:0 auto; border-radius:24px; padding:64px 40px; text-align:center;
+    background:linear-gradient(135deg, #131a29 0%, #0d2b2c 100%);
+    border:1px solid var(--panel-border); position:relative; overflow:hidden;
+  }
+  .cta-banner h2{font-size:32px; margin-bottom:14px;}
+  .cta-banner p{color:var(--text-dim); margin-bottom:32px; max-width:480px; margin-left:auto; margin-right:auto;}
+  .signup-form{display:flex; gap:10px; justify-content:center; max-width:440px; margin:0 auto; flex-wrap:wrap;}
+  .signup-form input{
+    flex:1; min-width:220px; padding:13px 18px; border-radius:999px; border:1px solid var(--panel-border);
+    background:var(--bg-alt); color:var(--text); font-size:14px;
+  }
+  .signup-form input:focus{outline:2px solid var(--accent);}
+  .form-note{font-size:12px; color:var(--text-dim); margin-top:14px;}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--panel-border); padding:40px 24px;}
+  .footer-inner{
+    max-width:1160px; margin:0 auto; display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:16px; color:var(--text-dim); font-size:13px;
+  }
+
+  @media(max-width:860px){
+    .hero h1{font-size:36px;}
+    .features-grid{grid-template-columns:1fr;}
+    .preview-inner{grid-template-columns:1fr;}
+    .benefits-grid{grid-template-columns:1fr 1fr;}
+    .nav-links{display:none;}
+  }
+  @media(max-width:520px){
+    .benefits-grid{grid-template-columns:1fr;}
+    .hero h1{font-size:29px;}
+    .step{grid-template-columns:44px 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo"><span class="logo-mark">df</span>desflow</div>
+    <div class="nav-links">
+      <a href="#funkcijos">Funkcijos</a>
+      <a href="#nauda">Nauda</a>
+      <a href="#kaip-veikia">Kaip veikia</a>
+      <a href="#duk">DUK</a>
+    </div>
+    <a href="programele.html" class="btn btn-primary">Atidaryti programėlę</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="eyebrow"><span class="dot"></span> Jau veikia — testinė versija gamybos įmonėms Lietuvoje</div>
+  <h1>Vienas skaitmeninis centras jūsų gamybos įmonei</h1>
+  <p class="sub">desflow sujungia darbuotojų darbo laiko paskirstymą projektams ir sandėlio valdymą į vieną paprastą platformą — matykite, kur eina laikas ir kur juda medžiagos, realiu laiku.</p>
+  <div class="hero-ctas">
+    <a href="programele.html" class="btn btn-primary">Atidaryti programėlę</a>
+    <a href="#funkcijos" class="btn btn-ghost">Peržiūrėti funkcijas</a>
+  </div>
+
+  <div class="preview-card">
+    <div class="preview-inner">
+      <div class="mini-panel">
+        <div class="label">Darbo valandos šiandien</div>
+        <div class="bar-row"><span>Projektas A</span><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div></div>
+        <div class="bar-row"><span>Projektas B</span><div class="bar-track"><div class="bar-fill" style="width:45%"></div></div></div>
+        <div class="bar-row"><span>Projektas C</span><div class="bar-track"><div class="bar-fill" style="width:90%"></div></div></div>
+      </div>
+      <div class="mini-panel">
+        <div class="label">Sandėlio judėjimas</div>
+        <div class="stock-row"><span>Plieno lakštai</span><span class="tag in">+120 vnt</span></div>
+        <div class="stock-row"><span>Sąranka Nr. 12</span><span class="tag out">−34 vnt</span></div>
+        <div class="stock-row"><span>Pakavimo medžiaga</span><span class="tag out">−8 vnt</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="funkcijos">
+  <div class="section-head">
+    <div class="eyebrow"><span class="dot"></span> Funkcijos</div>
+    <h2>Dvi programėlės, viena sistema</h2>
+    <p>desflow kuriamas kaip modulinė platforma — pradedame nuo dviejų svarbiausių gamybos įmonių poreikių.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card soon">
+      <span class="badge">JAU VEIKIA</span>
+      <div class="feature-icon">⏱</div>
+      <h3>Darbo valandų paskirstymas projektams</h3>
+      <p>Mobili ir darbalaukio programėlė, kurioje darbuotojai kasdien fiksuoja, kiek laiko skyrė kiekvienam projektui ar užsakymui.</p>
+      <ul class="feature-list">
+        <li>Kasdienis valandų įvedimas per kelias sekundes (Start/Finish)</li>
+        <li>Pastaba prie kiekvieno įrašo apie darbų eigą</li>
+        <li>Automatinės ataskaitos vadovams ir projektų vadovams</li>
+        <li>Viršvalandžiai (1,5x) bei savaitgalio/šventės (2x) skaičiuojami automatiškai</li>
+      </ul>
+      <a href="programele.html" class="btn btn-ghost btn-sm-link">Išbandyti →</a>
+    </div>
+    <div class="feature-card soon">
+      <span class="badge">JAU VEIKIA</span>
+      <div class="feature-icon">📦</div>
+      <h3>Sandėlio valdymas gamyboje</h3>
+      <p>Įkėlimų ir nurašymų fiksavimas tiesiai gamybos eigoje — žinokite tikslų likutį bet kuriuo momentu.</p>
+      <ul class="feature-list">
+        <li>Žaliavų ir medžiagų įkėlimas į sandėlį</li>
+        <li>Nurašymai pagal konkretų gamybos etapą ar užsakymą</li>
+        <li>Likučių sekimas realiu laiku, be Excel lentelių</li>
+        <li>Žemo likučio įspėjimai ir pilna judėjimų istorija</li>
+      </ul>
+      <a href="programele.html" class="btn btn-ghost btn-sm-link">Išbandyti →</a>
+    </div>
+  </div>
+</section>
+
+<section class="white-section" id="nauda">
+  <div class="section-head">
+    <div class="eyebrow"><span class="dot" style="background:var(--accent)"></span> Nauda įmonei</div>
+    <h2>Kodėl gamybos įmonės rinksis desflow</h2>
+    <p>Sukurta atsižvelgiant į realius gamybos sektoriaus iššūkius — ne bendrinis įrankis, o sprendimas jūsų kasdienai.</p>
+  </div>
+  <div class="benefits-grid">
+    <div class="benefit">
+      <div class="num">01</div>
+      <h4>Skaidrumas</h4>
+      <p>Aiškiai matote, kiek laiko ir resursų sunaudoja kiekvienas projektas.</p>
+    </div>
+    <div class="benefit">
+      <div class="num">02</div>
+      <h4>Mažiau popierizmo</h4>
+      <p>Rankiniai žurnalai ir Excel lentelės keičiami vienu skaitmeniniu įrankiu.</p>
+    </div>
+    <div class="benefit">
+      <div class="num">03</div>
+      <h4>Tikslesnė savikaina</h4>
+      <p>Realaus laiko duomenys apie darbą ir medžiagas leidžia tiksliau skaičiuoti projektų kaštus.</p>
+    </div>
+    <div class="benefit">
+      <div class="num">04</div>
+      <h4>Greitesni sprendimai</h4>
+      <p>Vadovai mato situaciją realiu laiku ir gali reaguoti į trūkumus ar vėlavimus greičiau.</p>
+    </div>
+  </div>
+</section>
+
+<section id="kaip-veikia">
+  <div class="section-head">
+    <div class="eyebrow"><span class="dot"></span> Kaip veikia</div>
+    <h2>Nuo registracijos iki pilno matomumo</h2>
+    <p>Paprastas paleidimo procesas, pritaikytas gamybos komandoms be papildomo IT resurso.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div><h4>Registruokitės ankstyvai prieigai</h4><p>Palikite savo el. paštą — pranešime, kai programėlė bus paruošta atsisiuntimui, ir suteiksime prioritetinę prieigą.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div><h4>Pridėkite projektus ir komandą</h4><p>Sukuriate projektų sąrašą ir pakviečiate darbuotojus — jokio sudėtingo diegimo, viskas veikia iš karto.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div><h4>Darbuotojai fiksuoja valandas ir sandėlio judėjimą</h4><p>Kasdien, tiesiogiai iš gamybos cecho — telefonu ar planšete, be popierinių žurnalų.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div><h4>Matote viską vienoje vietoje</h4><p>Realaus laiko ataskaitos apie darbo laiką, projektų savikainą ir sandėlio likučius.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="duk">
+  <div class="section-head">
+    <div class="eyebrow"><span class="dot"></span> DUK</div>
+    <h2>Dažniausiai užduodami klausimai</h2>
+  </div>
+  <div class="faq-list">
+    <details class="faq-item" open>
+      <summary>Kada bus galima atsisiųsti programėlę?</summary>
+      <p>Testinė versija jau veikia dabar — galite ją atidaryti tiesiai naršyklėje paspaudę „Atidaryti programėlę" ir pridėti prie telefono pradžios ekrano. Pilna versija su atskiromis paskyromis ir programėlėmis Google Play / App Store dar kuriama.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Ar desflow tinka mažoms gamybos įmonėms?</summary>
+      <p>Taip. Sistema kuriama taip, kad būtų paprasta naudoti tiek mažoms komandoms, tiek didesnėms gamykloms su keliais cechais.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Ar reikės keisti esamą apskaitos ar ERP sistemą?</summary>
+      <p>Ne — desflow kuriamas kaip papildomas įrankis kasdieniam darbo laiko ir sandėlio fiksavimui, kurio duomenis vėliau galėsite naudoti kartu su esamomis sistemomis.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Ar programėlė veiks telefone ir kompiuteryje?</summary>
+      <p>Taip, planuojama mobili programėlė darbuotojams gamyboje ir žiniatinklio prieiga vadovams ataskaitoms peržiūrėti.</p>
+    </details>
+  </div>
+</section>
+
+<section id="gauti-prieiga">
+  <div class="cta-banner">
+    <h2>Išbandykite desflow jau dabar</h2>
+    <p>Testinė versija veikia tiesiai naršyklėje — jokio diegimo. Norite pranešimo apie naujas funkcijas (atskiros paskyros, mobilios programėlės)? Palikite el. paštą.</p>
+    <div class="hero-ctas" style="margin-bottom:32px;">
+      <a href="programele.html" class="btn btn-primary">Atidaryti programėlę</a>
+    </div>
+    <form class="signup-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Ačiū! Susisieksime.'; this.querySelector('input').disabled=true; this.querySelector('button').disabled=true;">
+      <input type="email" placeholder="jusu@imone.lt" required>
+      <button type="submit" class="btn btn-ghost">Pranešti apie naujienas</button>
+    </form>
+    <p class="form-note">Jokio šlamšto — tik pranešimas apie naujas funkcijas.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="logo" style="font-size:16px;"><span class="logo-mark" style="width:24px;height:24px;font-size:13px;">df</span>desflow</div>
+    <div>© 2026 desflow. Skaitmeninis gamybos valdymas.</div>
+  </div>
+</footer>
+
+</body>
+</html>
